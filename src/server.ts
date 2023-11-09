@@ -17,7 +17,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.all("*", (req: Request, res: Response) => {
+import apiRoute from "./route/api";
+
+app.use("/api", apiRoute);
+
+app.all("*", (_req: Request, res: Response) => {
   let status: IStatus = {
     code: 404,
     status: "Not found",
