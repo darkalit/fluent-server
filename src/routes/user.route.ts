@@ -201,11 +201,11 @@ export default router;
  *             schema:
  *               $ref: "#/components/schemas/User"
  *       "401":
- *         $ref: "#/components/schemas/Unauthorized"
+ *         $ref: "#/components/responses/Unauthorized"
  *       "403":
- *         $ref: "#/components/schemas/Forbidden"
+ *         $ref: "#/components/responses/Forbidden"
  *       "404":
- *         $ref: "#/components/schemas/NotFound"
+ *         $ref: "#/components/responses/NotFound"
  *
  *   patch:
  *     summary: Update a user
