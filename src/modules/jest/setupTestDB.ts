@@ -7,7 +7,7 @@ const setupTestDB = () => {
   });
 
   afterAll(async () => {
-    // await mongoose.disconnect();
+    await mongoose.disconnect();
   });
 };
 
