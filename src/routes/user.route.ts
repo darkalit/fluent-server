@@ -31,9 +31,9 @@ router
     userController.updateUser,
   )
   .delete(
-    auth("manageUsers"),
+   auth("manageUsers"),
     validate(userValidation.deleteUser),
-    userController.deleteUser,
+   userController.deleteUser,
   );
 
 export default router;

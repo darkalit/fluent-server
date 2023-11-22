@@ -24,6 +24,7 @@ const userSchema = new Schema<IUserDoc, IUserModel>({
     required: true,
     trim: true,
     minlength: 8,
+    maxlength: 32,
     private: true,
   },
   auth_type: {

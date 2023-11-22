@@ -1,21 +1,21 @@
-import { Document, Model, Schema } from "mongoose";
+import { Document, Model, PipelineStage, Schema } from "mongoose";
 import { QueryResult } from "./paginate.interfaces";
 
 export interface IOptions {
   sortBy?: string;
   projectBy?: string;
-  populate?: string;
+  allowDiskUse?: boolean;
   limit?: number;
   page?: number;
 }
 
-function paginate<T extends Document, U extends Model<U>>(
+function aggregatePaginate<T extends Document, U extends Model<U>>(
   schema: Schema<T>,
 ): void {
   schema.static(
-    "paginate",
+    "aggregatePaginate",
     async function (
-      filter: Record<string, any>,
+      query: PipelineStage[],
       options: IOptions,
     ): Promise<QueryResult> {
       let sort: string = "";
@@ -30,16 +30,19 @@ function paginate<T extends Document, U extends Model<U>>(
         sort = "createdAt";
       }
 
-      let project: string = "";
+      let project: Record<string, any> = {};
       if (options.projectBy) {
-        const projectionCriteria: string[] = [];
         options.projectBy.split(",").forEach((projectOption: string) => {
           const [key, include] = projectOption.split(":");
-          projectionCriteria.push((include === "hide" ? "-" : "") + key);
+          if (key) {
+            project[key] = include === "hide" ? 0 : 1;
+          }
         });
-        project = projectionCriteria.join(" ");
       } else {
-        project = "-createdAt -updatedAt";
+        project = {
+          createdAt: 0,
+          updatedAt: 0,
+        };
       }
 
       const limit = options.limit && parseInt(options.limit.toString(), 10) > 0
@@ -50,25 +53,30 @@ function paginate<T extends Document, U extends Model<U>>(
         : 1;
       const skip = (page - 1) * limit;
 
-      const countPromise = this.countDocuments(filter).exec();
-      let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit)
-        .select(project);
+      let countPromise: any = this.aggregate(query).group({
+        _id: null,
+        count: {
+          $sum: 1,
+        },
+      });
 
-      if (options.populate) {
-        options.populate.split(",").forEach((populateOption: any) => {
-          docsPromise = docsPromise.populate(
-            populateOption
-              .split(".")
-              .reverse()
-              .reduce((a: string, b: string) => ({ path: b, populate: a })),
-          );
-        });
+      let docsPromise: any = this.aggregate(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .project(project);
+
+      if (options.allowDiskUse) {
+        countPromise = countPromise.allowDiskUse(true);
+        docsPromise = docsPromise.allowDiskUse(true);
       }
 
+      countPromise = countPromise.exec();
       docsPromise = docsPromise.exec();
 
       return Promise.all([countPromise, docsPromise]).then((values) => {
-        const [totalResults, results] = values;
+        let [totalResults, results] = values;
+        totalResults = totalResults[0] ? totalResults[0].count : 0;
         const totalPages = Math.ceil(totalResults / limit);
 
         let prev = null;
@@ -92,4 +100,4 @@ function paginate<T extends Document, U extends Model<U>>(
   );
 }
 
-export default paginate;
+export default aggregatePaginate;

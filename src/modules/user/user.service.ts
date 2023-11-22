@@ -7,14 +7,29 @@ import {
   UpdateUserBody,
 } from "./user.interfaces";
 import User from "./user.model";
-import { IOptions, QueryResult } from "../paginate/paginate";
+import { IOptions } from "../paginate/paginate";
+import { QueryResult } from "../paginate/paginate.interfaces";
 import mongoose from "mongoose";
+import { userStatService } from "../userStat";
 
 export async function createUser(userBody: NewCreatedUser): Promise<IUserDoc> {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
-  return User.create(userBody);
+  const user = await User.create(userBody);
+
+  if (userBody.role == "user") {
+    userStatService.createUserStat({
+      user: new mongoose.Types.ObjectId(user.id),
+      word_progress: new Map(),
+      selected: {
+        themes: [],
+        daily_words_count: 0,
+      },
+    });
+  }
+
+  return user;
 }
 
 export async function registerUser(
@@ -23,7 +38,19 @@ export async function registerUser(
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
-  return User.create(userBody);
+
+  const user = await User.create(userBody);
+
+  userStatService.createUserStat({
+    user: new mongoose.Types.ObjectId(user.id),
+    word_progress: new Map(),
+    selected: {
+      themes: [],
+      daily_words_count: 0,
+    },
+  });
+
+  return user;
 }
 
 export async function queryUsers(

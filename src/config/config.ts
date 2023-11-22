@@ -16,6 +16,9 @@ const envVarsSchema = Joi.object()
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description(
       "days after which refresh tokens expire",
     ),
+    MAX_POINTS_WORD_PROGRESS: Joi.number().default(7).description(
+      "number of points to complete a word",
+    ),
   })
   .unknown();
 
@@ -31,7 +34,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongoose: {
-    url: envVars.MONGO_DB_URL,
+    url: envVars.MONGO_DB_URL + (envVars.NODE_ENV === "test" ? "-test" : ""),
     options: {
       useCreateIndex: true,
       useNewUrlParser: true,
@@ -47,6 +50,7 @@ const config = {
       secure: envVars.NODE_ENV === "production",
     },
   },
+  maxPoints: envVars.MAX_POINTS_WORD_PROGRESS,
 };
 
 export default config;

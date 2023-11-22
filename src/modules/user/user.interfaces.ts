@@ -1,5 +1,5 @@
 import { Document, Model, Types } from "mongoose";
-import { QueryResult } from "../paginate/paginate";
+import { QueryResult } from "../paginate/paginate.interfaces";
 import { IAuthTokens } from "../token/token.interfaces";
 
 export interface IUser {

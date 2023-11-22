@@ -1,5 +1,133 @@
 components:
   schemas:
+    Word:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectId
+        ukr:
+          type: string
+        eng:
+          type: string
+        category:
+          type: string
+        theme:
+          type: string
+          format: objectId
+        phonetics:
+          type: object
+          properties:
+            text:
+              type: string
+            audio:
+              type: string
+      example:
+        id: 655146e6812b591eccc62e32
+        ukr: Водоспади
+        eng: Waterfalls
+        category: B2
+        theme: 6551448c812b591eccc62d45
+        phonetics:
+          text: "/kəʊd/"
+          audio: "https://api.dictionaryapi.dev/media/pronunciations/en/code-uk.mp3"
+
+    ThemeByUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectId
+        name:
+          type: string
+        image:
+          type: string
+        results:
+          type: number
+        learnt:
+          type: integer
+        outof:
+          type: integer
+      example:
+        result: 2.47
+        id: 6551448c812b591eccc62d43
+        learnt: 2
+        outof: 81
+        name: Мистецтво та література
+        image: null
+
+    ChooseTest:
+      type: object
+      properties:
+        test:
+          type: string
+          format: objectId
+        correct:
+          type: integer
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Word"
+      example:
+        test: 655d2ffee086b654aa327037
+        correct: 0
+        variants:
+          - phonetics:
+              text: null
+              audio: null
+            ukr: Снорклінг
+            eng": Snorkeling
+            category: B2
+            theme: 6551448c812b591eccc62d45
+            id": 655146e6812b591eccc62e3b
+          - ukr: Скасування
+            eng: Quash
+            category: B2
+            theme: 6551448c812b591eccc62d47
+            phonetics:
+              text: /kwɑʃ/
+              audio: https://api.dictionaryapi.dev/media/pronunciations/en/quash-us.mp3
+            id: 655146e6812b591eccc62edf
+          - ukr: Подобається
+            eng: Like
+            category: A2
+            theme: 6551448c812b591eccc62d44
+            phonetics:
+              text: /laɪk/
+              audio: https://api.dictionaryapi.dev/media/pronunciations/en/like-us.mp3
+            id: 655146e6812b591eccc62db4
+          - ukr: Заповіт
+            eng: Testament
+            category: B2
+            theme: 6551448c812b591eccc62d47
+            phonetics:
+              text: /ˈtɛst.ə.mənt/
+              audio: null
+            id: 655146e6812b591eccc62ece
+
+    EnterTest:
+      type: object
+      properties:
+        test:
+          type: string
+          format: objectId
+        correct:
+          type: string
+        variant:
+          $ref: "#/components/schemas/Word"
+      example:
+        test: 655d2ffee086b654aa327031
+        correct: Itinerary
+        variant:
+          phonetics:
+            text: /aɪˈtɪnəɹɛɹi/
+            audio: https://api.dictionaryapi.dev/media/pronunciations/en/itinerary-us.mp3
+          ukr: Маршрут
+          eng: Itinerary
+          category: B2
+          theme: 6551448c812b591eccc62d45
+          id: 655146e6812b591eccc62e0e
+
     User:
       type: object
       properties:
@@ -52,7 +180,7 @@ components:
       type: object
       properties:
         code:
-          type: number
+          type: integer
         message:
           type: string
 

@@ -3,6 +3,7 @@ import ApiError from "./ApiError";
 import mongoose from "mongoose";
 import httpStatus from "http-status";
 import config from "../../config/config";
+import fs from "fs";
 
 export function errorConverter(
   err: any,
@@ -24,10 +25,27 @@ export function errorConverter(
 
 export function errorHandler(
   err: ApiError,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) {
+  if (req.file) {
+    fs.unlink(req.file.path, () => {});
+  }
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      req.files.forEach((file: Express.Multer.File) => {
+        fs.unlink(file.path, () => {});
+      });
+    } else {
+      Object.values(req.files).forEach((files: Express.Multer.File[]) => {
+        files.forEach((file: Express.Multer.File) => {
+          fs.unlink(file.path, () => {});
+        });
+      });
+    }
+  }
+
   let { statusCode, message } = err;
   if (config.env === "production" && !err.isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;
@@ -39,11 +57,8 @@ export function errorHandler(
   const response = {
     code: statusCode,
     message,
-    ...(config.env === "production" && { stack: err.stack }),
+    stack: err.stack,
   };
-
-  if (config.env === "production") {
-  }
 
   res.status(statusCode).send(response);
 }
