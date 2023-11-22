@@ -1,39 +1,3 @@
-// import dotenv from "dotenv";
-// import cors from "cors";
-//
-// dotenv.config();
-//
-// import express, { Request, Response } from "express";
-// import cookieParser from "cookie-parser";
-//
-// const PORT = process.env.API_PORT || 7070;
-//
-// const app = express();
-// import db from "./db";
-//
-// app.use(cors());
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
-// app.use(cookieParser());
-//
-// import apiRoute from "./route/api";
-//
-// app.use("/api", apiRoute);
-//
-// app.all("*", (_req: Request, res: Response) => {
-//   return res.status(404).json({
-//     code: 404,
-//     status: "Not found",
-//     message: "Page not found",
-//   });
-// });
-//
-// db.once("open", () => {
-//   app.listen(PORT, () => {
-//     console.log(`Server running at port: ${PORT}`);
-//   });
-// });
-
 import express, { Express } from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -45,8 +9,12 @@ import { ApiError, errorConverter, errorHandler } from "./modules/error";
 import httpStatus from "http-status";
 import cookieParser from "cookie-parser";
 import routes from "./routes";
+import { morgan } from "./modules/logger";
 
 const app: Express = express();
+
+app.use(morgan.errorHandler);
+app.use(morgan.succesHandler);
 
 app.use(helmet());
 
